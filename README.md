@@ -400,8 +400,7 @@ Ulike miljøer og variabler pr miljø.
 
 Testklient som tar for seg en innsending av melding i sin helhet mot API-tjenesten.
 
-Last ned eksempelkode (.NET 8.0):
-[https://dev.azure.com/hreg/SLASH/\_git/Slash.Public](https://dev.azure.com/hreg/SLASH/_git/Slash.Public?path=/src "https://dev.azure.com/hreg/SLASH/_git/Slash.Public?path=/src")
+
 
 <div style="page-break-after: always"></div>
 
