@@ -12,7 +12,7 @@
 
 # SLASH - API Mottak
 
-Dette dokumentet tar for seg SLASH API-løsningen for å avlevere meldinger inn til registeret.
+Dette dokumentet tar for seg SLASH API-løsningen for å overføre helsedata til registeret.
 
 Det er mulig å laste ned en fullstendig demoløsning for innsending.<br>
 Se [Eksempelkode](#eksempelkode) for mer informasjon.
@@ -25,7 +25,7 @@ Se [Eksempelkode](#eksempelkode) for mer informasjon.
 - [Overordnet flyt](#overordnet-flyt)
 - [Autentisering](#autentisering)
 - [API metoder](#api-metoder)
-- [Avlevering av meldinger](#avlevering-av-meldinger)
+- [Overføring av helsedata](#overføring-av-helsedata)
 - [Miljøer](#miljøer)
 - [Eksempelkode](#eksempelkode)
 - [Referanser](#referanser)
@@ -34,16 +34,13 @@ Se [Eksempelkode](#eksempelkode) for mer informasjon.
 
 ## Om tjenesten
 
-Tjenesten er et HTTP-basert API for avlevering av meldinger.
-Revidert versjon etter pilotering og testing av "KNEIK"-prosjektet 2021/2022.
+Tjenesten er et REST-basert API designet for sikker overføring av helsedata. API-et tilbyr en moderne og effektiv løsning for avlevering av meldinger via HTTP, som et alternativ til tradisjonelle EDI-baserte løsninger.
 
-Formålet med tjenesten er å kunne motta meldinger via HTTP/API som et alternativt til EDI.
-Tjenesten sjekker autentisering, signering, header-verdier og struktur på meldingen sekvensielt slik at avsender får en umiddelbar respons om oversendelsen er teknisk godkjent og mottatt.
+Meldinger sendes i JSON-format og må krypteres, signeres, og autentiseres ved bruk av HelseID. Ved mottak validerer tjenesten autentisering, signatur, header-verdier og meldingsstruktur i en sekvensiell prosess. Dette sikrer at avsender umiddelbart får tilbakemelding om hvorvidt meldingen er teknisk godkjent og korrekt mottatt.
 
 ### Krav
 
-Tjenesten benytter HelseID til autentisering. Det stilles derfor krav til at en hver innsender har en oppføring i HelseID for den lokasjonen som skal sende inn data gjennom denne tjenesten.
-(HelseID-klienten bør utstedes på bedriftsnummeret til den faktiske lokasjonen)
+Tjenesten benytter HelseID til autentisering. Det stilles derfor krav til at en hver innsender har en oppføring i HelseID for den lokasjonen som skal sende inn data gjennom denne tjenesten. (HelseID-klienten bør utstedes på bedriftsnummeret til den faktiske lokasjonen)
 
 I tillegg til dette kan det være nødvendig å opprette nettverksåpninger mot API-tjenesten til FHI på NHN og helsenettet.
 
@@ -52,7 +49,7 @@ I tillegg til dette kan det være nødvendig å opprette nettverksåpninger mot 
 ## Overordnet flyt
 
 ![Systemskisse](docs/images/innsending-flytskjema.jpg)
-_Overordnet skisse på hvordan en meldinger avleveres med API-tjenesten_
+_Overordnet skisse på hvordan helsedata skal overføres med API-tjenesten_
 
 #### Forklaring
 
@@ -115,9 +112,9 @@ Portalen viser endepunkter for API-et.
 
 <div style="page-break-after: always"></div>
 
-## Avlevering av meldinger
+## Overføring av helsedata
 
-Detaljert dokumentasjon på hvordan avlevere meldinger til API-tjenesten.
+Detaljert dokumentasjon på hvordan en skal overføre helsedata til API-tjenesten.
 
 #### 1) Forbred meldingsinnhold og headerverdier
 
@@ -387,12 +384,9 @@ I tillegg vil en motta ytterligere informasjon om hva som feilet i body. Eksempe
 
 Ulike miljøer og variabler pr miljø.
 
-### API avlevering
+### API Endepunkter
 
-- Dev: https://app-mottak-api-dev.azurewebsites.net/ (Internett)
-- Test: https://app-mottak-api-test.azurewebsites.net/ (Internett)
-- QA: n/a (Helsenett)
-- Prod: n/a (Helsenett)
+- QA/Pilot: https://apimottak01.qa.fihr.no/ (Helsenett)
 
 <div style="page-break-after: always"></div>
 
