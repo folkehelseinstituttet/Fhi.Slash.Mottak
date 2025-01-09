@@ -29,13 +29,10 @@ jobs:
       working-directory: src
       run: dotnet build --configuration Release --no-restore
 
-    # Step 6: Pack the NuGet package
-    - name: Pack NuGet package
-      working-directory: src
-      run: dotnet pack --configuration Release --no-build --output ./nupkgs
-
-    # Step 7: Publish the package to NuGet.org
+    # Step 6: Publish the package to NuGet.org
     - name: Publish NuGet Package
       run: |
-        dotnet pack --configuration Release
-        dotnet nuget push ./bin/Release/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
+        dotnet pack ./src/Slash.Public.APIMessenger/Slash.Public.APIMessenger.csproj --configuration Release
+        dotnet pack ./src/Slash.Public.APIMessengerCLI/Slash.Public.APIMessengerCLI.csproj --configuration Release
+        dotnet nuget push ./src/Slash.Public.APIMessenger/bin/Release/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
+        dotnet nuget push ./src/Slash.Public.APIMessengerCLI/bin/Release/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
