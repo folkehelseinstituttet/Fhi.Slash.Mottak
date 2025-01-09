@@ -1,0 +1,41 @@
+name: Publish to NuGet
+
+on:
+  push:
+    branches: [ "public-github" ]
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Step 1: Checkout the code
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    # Step 2: Setup .NET
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '8.0.x' # Specify the .NET version
+
+    # Step 3: Restore dependencies
+    - name: Restore dependencies
+      working-directory: src
+      run: dotnet restore
+
+    # Step 4: Build the solution
+    - name: Build the solution
+      working-directory: src
+      run: dotnet build --configuration Release --no-restore
+
+    # Step 6: Pack the NuGet package
+    - name: Pack NuGet package
+      working-directory: src
+      run: dotnet pack --configuration Release --no-build --output ./nupkgs
+
+    # Step 7: Publish the package to NuGet.org
+    - name: Publish NuGet Package
+      run: |
+        dotnet pack --configuration Release
+        dotnet nuget push ./bin/Release/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
