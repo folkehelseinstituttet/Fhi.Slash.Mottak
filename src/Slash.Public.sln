@@ -3,13 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.8.34316.72
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "APIMessenger", "APIMessenger", "{6D789AED-9806-4970-AAAD-A2BB4A747B0D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Slash.Public.SlashMessenger", "Slash.Public.APIMessenger\Slash.Public.SlashMessenger.csproj", "{173B6881-7B75-4BEB-8BDB-7D31C1563EC2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Slash.Public.APIMessenger", "Slash.Public.APIMessenger\Slash.Public.APIMessenger.csproj", "{173B6881-7B75-4BEB-8BDB-7D31C1563EC2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Slash.Public.SlashMessengerCLI", "Slash.Public.APIMessengerCLI\Slash.Public.SlashMessengerCLI.csproj", "{D4560FD4-32EB-46A0-878D-81B0F1E30B86}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Slash.Public.APIMessengerCLI", "Slash.Public.APIMessengerCLI\Slash.Public.APIMessengerCLI.csproj", "{D4560FD4-32EB-46A0-878D-81B0F1E30B86}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{070BFCC7-08DC-4C0E-9CE0-A3185D256E21}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Slash.Public.Common", "Slash.Public.Common\Slash.Public.Common.csproj", "{49C48A41-0B72-4B21-AD48-DD39A4C99D22}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Slash.Public.SlashMessenger.UnitTests", "Slash.Public.APIMessenger.UnitTests\Slash.Public.SlashMessenger.UnitTests.csproj", "{576A6D21-09E7-48A0-A1D6-9737AFBD7288}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Slash.Public.APIMessenger.IntegrationTests", "Slash.Public.APIMessenger.IntegrationTests\Slash.Public.APIMessenger.IntegrationTests.csproj", "{881ABFDB-B466-43A0-AAC2-7E6663AD617E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -25,17 +27,21 @@ Global
 		{D4560FD4-32EB-46A0-878D-81B0F1E30B86}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D4560FD4-32EB-46A0-878D-81B0F1E30B86}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D4560FD4-32EB-46A0-878D-81B0F1E30B86}.Release|Any CPU.Build.0 = Release|Any CPU
-		{49C48A41-0B72-4B21-AD48-DD39A4C99D22}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{49C48A41-0B72-4B21-AD48-DD39A4C99D22}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{49C48A41-0B72-4B21-AD48-DD39A4C99D22}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{49C48A41-0B72-4B21-AD48-DD39A4C99D22}.Release|Any CPU.Build.0 = Release|Any CPU
+		{576A6D21-09E7-48A0-A1D6-9737AFBD7288}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{576A6D21-09E7-48A0-A1D6-9737AFBD7288}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{576A6D21-09E7-48A0-A1D6-9737AFBD7288}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{576A6D21-09E7-48A0-A1D6-9737AFBD7288}.Release|Any CPU.Build.0 = Release|Any CPU
+		{881ABFDB-B466-43A0-AAC2-7E6663AD617E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{881ABFDB-B466-43A0-AAC2-7E6663AD617E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{881ABFDB-B466-43A0-AAC2-7E6663AD617E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{881ABFDB-B466-43A0-AAC2-7E6663AD617E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{173B6881-7B75-4BEB-8BDB-7D31C1563EC2} = {6D789AED-9806-4970-AAAD-A2BB4A747B0D}
-		{D4560FD4-32EB-46A0-878D-81B0F1E30B86} = {6D789AED-9806-4970-AAAD-A2BB4A747B0D}
+		{576A6D21-09E7-48A0-A1D6-9737AFBD7288} = {070BFCC7-08DC-4C0E-9CE0-A3185D256E21}
+		{881ABFDB-B466-43A0-AAC2-7E6663AD617E} = {070BFCC7-08DC-4C0E-9CE0-A3185D256E21}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {286C4F1D-7BFA-4692-BD7E-E3A35B56898C}
