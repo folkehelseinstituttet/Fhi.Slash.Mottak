@@ -2,7 +2,7 @@ name: Publish to NuGet
 
 on:
   push:
-    branches: [ "public-github" ]
+    branches: [ "actions" ]
 
 jobs:
   build-and-publish:
