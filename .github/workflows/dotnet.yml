@@ -30,9 +30,7 @@ jobs:
       run: dotnet build --configuration Release --no-restore
 
     # Step 6: Publish the package to NuGet.org
-    - name: Publish NuGet Package
+    - name: Publish NuGet Package (remember to bump Version in project)
       run: |
         dotnet pack src/Slash.Public.APIMessenger/Slash.Public.SlashMessenger.csproj --configuration Release
-        dotnet pack src/Slash.Public.APIMessengerCLI/Slash.Public.SlashMessengerCLI.csproj --configuration Release
         dotnet nuget push src/Slash.Public.APIMessenger/bin/Release/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
-        dotnet nuget push src/Slash.Public.APIMessengerCLI/bin/Release/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
