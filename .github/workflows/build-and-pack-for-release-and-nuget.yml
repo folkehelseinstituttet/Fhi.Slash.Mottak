@@ -1,0 +1,64 @@
+name: Build and pack for github release and nuget
+
+on:
+  push:
+    branches: [ "public-github" ]
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Checkout the code
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    # Setup .NET
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '8.0.x' # Specify the .NET version
+
+    # Restore dependencies
+    - name: Restore dependencies
+      working-directory: src
+      run: dotnet restore
+
+    # Build the solution
+    - name: Build the solution
+      working-directory: src
+      run: dotnet build --configuration Release --no-restore
+
+    - name: Set Version
+      id: set-version
+      run: |
+        # Define major and minor versions
+        MAJOR=1
+        MINOR=0
+
+        PATCH=${{ github.run_number }}
+        VERSION="${MAJOR}.${MINOR}.${PATCH}"
+        echo "Version: $VERSION"
+        echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+   # Pack the NuGet Package
+    - name: Create NuGet Package
+      run: dotnet pack src/Fhi.Slash.Public.SlashMessenger/Fhi.Slash.Public.SlashMessenger.csproj --configuration Release -p:Version=${{ env.VERSION }}
+
+  # Create a GitHub Release
+    - name: Create GitHub Release
+      uses: ncipollo/release-action@v1
+      with:
+        artifacts: |
+          src/Fhi.Slash.Public.SlashMessenger/bin/Release/Fhi.Slash.Public.SlashMessenger.${{ env.VERSION }}.nupkg
+        token: ${{ secrets.GITHUB_TOKEN }}
+        tag: v${{ env.VERSION }}
+        name: Release v${{ env.VERSION }}
+        body: |
+          Release of version v${{ env.VERSION }}.
+          - Automatically packaged and built from the latest source.
+
+    # Upload NuGet Package to NuGet.org
+    - name: Publish NuGet Package 
+      run: |
+        dotnet nuget push src/Fhi.Slash.Public.SlashMessenger/bin/Release/Fhi.Slash.Public.SlashMessenger.${{ env.VERSION }}.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
