@@ -2,7 +2,6 @@
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.IdentityModel.Tokens;
-using Moq;
 using Newtonsoft.Json.Linq;
 using Fhi.Slash.Public.SlashMessenger.HelseId;
 using Fhi.Slash.Public.SlashMessenger.HelseId.Interfaces;
@@ -15,6 +14,7 @@ using System.Net;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.Json;
+using NSubstitute;
 
 namespace Fhi.Slash.Public.SlashMessenger.UnitTests;
 
@@ -45,7 +45,7 @@ public class SlashMessengerTests
     public async Task ShouldThrowErrorIfMessageIsNotAValidJson()
     {
         // Arrange
-        var slashService = new DefaultSlashService(_defaultSlashConfig, new NullLogger<DefaultSlashService>(), new Mock<ISlashClient>().Object, new Mock<IHelseIdService>().Object, _dPoPProofJwk);
+        var slashService = new DefaultSlashService(_defaultSlashConfig, new NullLogger<DefaultSlashService>(), Substitute.For<ISlashClient>(), Substitute.For<IHelseIdService>(), _dPoPProofJwk);
 
         // Act
         var act = async () => await slashService.PrepareAndSendMessage("NOT_A_VALID_JSON", "test", "test");
@@ -59,7 +59,7 @@ public class SlashMessengerTests
     public async Task ShouldThrowErrorIfMessageIsNotAJsonArray()
     {
         // Arrange
-        var slashService = new DefaultSlashService(_defaultSlashConfig, new NullLogger<DefaultSlashService>(), new Mock<ISlashClient>().Object, new Mock<IHelseIdService>().Object, _dPoPProofJwk);
+        var slashService = new DefaultSlashService(_defaultSlashConfig, new NullLogger<DefaultSlashService>(), Substitute.For<ISlashClient>(), Substitute.For<IHelseIdService>(), _dPoPProofJwk);
 
         // Act
         var act = async () => await slashService.PrepareAndSendMessage("{\"error\": \"SHOULD_NOT_BE_JSON_OBJECT\"}", "test", "test");
@@ -73,10 +73,9 @@ public class SlashMessengerTests
     public async Task HelseIdClientShouldCacheAccessToken()
     {
         // Arrange
-        var dPoPHttpClientMock = new Mock<HttpClient>();
-        var slashHttpFactoryMock = new Mock<IHttpClientFactory>();
-        slashHttpFactoryMock.Setup(x => x.CreateClient(_defaultSlashConfig.BasicClientName)).Returns(CreateSlashDefaultClient);
-        slashHttpFactoryMock.Setup(x => x.CreateClient(_defaultSlashConfig.DPoPClientName)).Returns(CreateSlashDPoPClient);
+        var slashHttpFactory = Substitute.For<IHttpClientFactory>();
+        slashHttpFactory.CreateClient(_defaultSlashConfig.BasicClientName).Returns(_ => CreateSlashDefaultClient());
+        slashHttpFactory.CreateClient(_defaultSlashConfig.DPoPClientName).Returns(_ => CreateSlashDPoPClient());
 
         var helseIdConfig = new HelseIdConfig
         {
@@ -84,15 +83,16 @@ public class SlashMessengerTests
             ClientId = "just-a-test",
             Certificate = _certificate
         };
-        var helseIdHttpFactoryMock = new Mock<IHttpClientFactory>();
-        helseIdHttpFactoryMock.Setup(x => x.CreateClient(helseIdConfig.BasicClientName)).Returns(CreateHelseIdClient);
 
-        var memoryCacheMock = SetupMemoryCacheMock();
-        
-        var helseIdClient = new DefaultHelseIdClient(helseIdConfig, new NullLogger<DefaultHelseIdClient>(), helseIdHttpFactoryMock.Object, _dPoPProofJwk);
-        var helseIdService = new DefaultHelseIdService(new NullLogger<DefaultHelseIdService>(), memoryCacheMock.Object, helseIdClient);
+        var helseIdHttpFactory = Substitute.For<IHttpClientFactory>();
+        helseIdHttpFactory.CreateClient(helseIdConfig.BasicClientName).Returns(_ => CreateHelseIdClient());
 
-        var slashClient = new DefaultSlashClient(_defaultSlashConfig, new NullLogger<DefaultSlashClient>(), slashHttpFactoryMock.Object);
+        var memoryCache = SetupMemoryCacheMock();
+
+        var helseIdClient = new DefaultHelseIdClient(helseIdConfig, new NullLogger<DefaultHelseIdClient>(), helseIdHttpFactory, _dPoPProofJwk);
+        var helseIdService = new DefaultHelseIdService(new NullLogger<DefaultHelseIdService>(), memoryCache, helseIdClient);
+
+        var slashClient = new DefaultSlashClient(_defaultSlashConfig, new NullLogger<DefaultSlashClient>(), slashHttpFactory);
         var slashService = new DefaultSlashService(_defaultSlashConfig, new NullLogger<DefaultSlashService>(), slashClient, helseIdService, _dPoPProofJwk);
 
         // Act
@@ -100,18 +100,17 @@ public class SlashMessengerTests
         await slashService.PrepareAndSendMessage(_testMessage, "HST_Avtale", "1");
 
         // Assert
-        memoryCacheMock.Verify(x => x.TryGetValue(It.IsAny<object>(), out It.Ref<object>.IsAny!), Times.Exactly(3));
-        memoryCacheMock.Verify(x => x.CreateEntry(It.IsAny<object>()), Times.Once);
+        memoryCache.Received(3).TryGetValue(Arg.Any<object>(), out Arg.Any<object>()!);
+        memoryCache.Received(1).CreateEntry(Arg.Any<object>());
     }
 
     [TestMethod]
     public async Task ShouldSendMessageToSlash()
     {
         // Arrange
-        var dPoPHttpClientMock = new Mock<HttpClient>();
-        var slashHttpFactoryMock = new Mock<IHttpClientFactory>();
-        slashHttpFactoryMock.Setup(x => x.CreateClient(_defaultSlashConfig.BasicClientName)).Returns(CreateSlashDefaultClient);
-        slashHttpFactoryMock.Setup(x => x.CreateClient(_defaultSlashConfig.DPoPClientName)).Returns(CreateSlashDPoPClient);
+        var slashHttpFactory = Substitute.For<IHttpClientFactory>();
+        slashHttpFactory.CreateClient(_defaultSlashConfig.BasicClientName).Returns(_ => CreateSlashDefaultClient());
+        slashHttpFactory.CreateClient(_defaultSlashConfig.DPoPClientName).Returns(_ => CreateSlashDPoPClient());
 
         var helseIdConfig = new HelseIdConfig
         {
@@ -119,16 +118,16 @@ public class SlashMessengerTests
             ClientId = "just-a-test",
             Certificate = _certificate
         };
-        var helseIdHttpFactoryMock = new Mock<IHttpClientFactory>();
-        helseIdHttpFactoryMock.Setup(x => x.CreateClient(helseIdConfig.BasicClientName)).Returns(CreateHelseIdClient);
 
-        var memoryCacheMock = SetupMemoryCacheMock();
+        var helseIdHttpFactory = Substitute.For<IHttpClientFactory>();
+        helseIdHttpFactory.CreateClient(helseIdConfig.BasicClientName).Returns(_ => CreateHelseIdClient());
 
-       
-        var helseIdClient = new DefaultHelseIdClient(helseIdConfig, new NullLogger<DefaultHelseIdClient>(), helseIdHttpFactoryMock.Object, _dPoPProofJwk);
-        var helseIdService = new DefaultHelseIdService(new NullLogger<DefaultHelseIdService>(), memoryCacheMock.Object, helseIdClient);
+        var memoryCache = SetupMemoryCacheMock();
 
-        var slashClient = new DefaultSlashClient(_defaultSlashConfig, new NullLogger<DefaultSlashClient>(), slashHttpFactoryMock.Object);
+        var helseIdClient = new DefaultHelseIdClient(helseIdConfig, new NullLogger<DefaultHelseIdClient>(), helseIdHttpFactory, _dPoPProofJwk);
+        var helseIdService = new DefaultHelseIdService(new NullLogger<DefaultHelseIdService>(), memoryCache, helseIdClient);
+
+        var slashClient = new DefaultSlashClient(_defaultSlashConfig, new NullLogger<DefaultSlashClient>(), slashHttpFactory);
         var slashService = new DefaultSlashService(_defaultSlashConfig, new NullLogger<DefaultSlashService>(), slashClient, helseIdService, _dPoPProofJwk);
 
         // Act
@@ -138,42 +137,33 @@ public class SlashMessengerTests
         response.ProcessMessageResponse.Delivered.Should().BeTrue();
     }
 
-    private Mock<IMemoryCache> SetupMemoryCacheMock()
+    private IMemoryCache SetupMemoryCacheMock()
     {
-        var memoryCacheMock = new Mock<IMemoryCache>();
-        memoryCacheMock
-            .Setup(x => x.TryGetValue(It.IsAny<object>(), out It.Ref<object>.IsAny!))
-            .Returns((object key, out object value) =>
+        var memoryCache = Substitute.For<IMemoryCache>();
+        memoryCache.TryGetValue(Arg.Any<object>(), out Arg.Any<object>()!).Returns(call =>
+        {
+            var key = call[0];
+            var found = _cacheStore.TryGetValue(key, out var value);
+            call[1] = value;
+            return found;
+        });
+
+        memoryCache.CreateEntry(Arg.Any<object>()).Returns(call =>
+        {
+            var key = call[0];
+            var cacheEntry = Substitute.For<ICacheEntry>();
+            cacheEntry.When(entry => entry.Dispose()).Do(_ =>
             {
-                if (_cacheStore.TryGetValue(key, out var foundValue))
+                if (cacheEntry.Value != null)
                 {
-                    value = foundValue;
-                    return true;
+                    _cacheStore[key] = cacheEntry.Value;
                 }
-                value = null!;
-                return false;
             });
 
-        memoryCacheMock
-            .Setup(x => x.CreateEntry(It.IsAny<object>()))
-            .Returns((object key) =>
-            {
-                var mockEntry = new Mock<ICacheEntry>();
-                mockEntry.SetupAllProperties();
-                mockEntry
-                    .Setup(e => e.Dispose())
-                    .Callback(() =>
-                    {
-                        if (mockEntry.Object.Value != null)
-                        {
-                            _cacheStore[key] = mockEntry.Object.Value;
-                        }
-                    });
+            return cacheEntry;
+        });
 
-                return mockEntry.Object;
-            });
-
-        return memoryCacheMock;
+        return memoryCache;
     }
 
     private HttpClient CreateSlashDefaultClient()

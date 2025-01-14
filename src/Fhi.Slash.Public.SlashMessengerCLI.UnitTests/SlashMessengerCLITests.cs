@@ -1,11 +1,11 @@
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Moq;
 using Slash.Public.SlashMessenger.Slash.Interfaces;
 using Slash.Public.SlashMessenger.Slash.Models;
 using Fhi.Slash.Public.SlashMessengerCLI.Config;
 using System.Security.Cryptography;
+using NSubstitute;
 
 namespace Fhi.Slash.Public.SlashMessengerCLI.UnitTests;
 
@@ -33,9 +33,9 @@ public class SlashMessengerCLITests
     public async Task ShouldSendMessage()
     {
         // Arrange
-        var mockSlashService = new Mock<ISlashService>();
-        mockSlashService.Setup(service => service.PrepareAndSendMessage(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
-            .ReturnsAsync(new SendMessageResponse()
+        var slashService = Substitute.For<ISlashService>();
+        slashService.PrepareAndSendMessage(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>())
+            .Returns(new SendMessageResponse()
             {
                 CorrelationId = Guid.Empty,
                 ProcessMessageResponse = new ProcessMessageResponse()
@@ -65,7 +65,7 @@ public class SlashMessengerCLITests
         var testHost = new HostBuilder()
             .ConfigureServices((ctx, services) =>
             {
-                services.AddTransient(_ => mockSlashService.Object);
+                services.AddTransient(_ => slashService);
             })
             .Build();
 
@@ -79,7 +79,7 @@ public class SlashMessengerCLITests
         await Program.Execute(testHost, filename, msgType, msgVersion);
 
         // Assert
-        mockSlashService.Verify(service => service.PrepareAndSendMessage(fileContent, msgType, msgVersion), Times.Once);
+        await slashService.Received(1).PrepareAndSendMessage(fileContent, msgType, msgVersion);
 
         // Cleanup
         File.Delete(filename);
