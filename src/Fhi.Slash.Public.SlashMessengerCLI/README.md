@@ -13,26 +13,28 @@
 
 # SLASH Messenger CLI
 
-Dette dokumentet er ment som en veiledning for bruk av `SlashMessenger` NuGet-pakken og gir en oversikt over eksempelkoden samt hvordan du kan bruke den.
+Dette dokumentet er en veiledning for bruk av SlashMessenger-pakken i NuGet. Det gir en oversikt over eksempelkoden og forklarer hvordan du kan ta den i bruk.
 
 <br>
 
 ## Innhold
+
 - [SLASH Messenger CLI](#slash-messenger-cli)
   - [Innhold](#innhold)
   - [Om eksempelkode](#om-eksempelkode)
   - [Overordnet flyt](#overordnet-flyt)
   - [Egne utvidelser](#egne-utvidelser)
-      - [Tjenester og klienter](#tjenester-og-klienter)
-      - [HttpClient](#httpclient)
-      - [Endre JWK i DPoP-bevis](#endre-jwk-i-dpop-bevis)
-        - [Slik gjør du det](#slik-gjør-du-det)
-      - [Eksempel](#eksempel)
+    - [Tjenester og klienter](#tjenester-og-klienter)
+    - [HttpClient](#httpclient)
+    - [Endre JWK i DPoP-bevis](#endre-jwk-i-dpop-bevis)
+      - [Slik gjør du det](#slik-gjør-du-det)
+    - [Eksempler](#eksempler)
   - [Gi oss dine tilbakemeldinger](#gi-oss-dine-tilbakemeldinger)
 
 <div style="page-break-after: always"></div>
 
 ## Om eksempelkode
+
 Eksempelkoden i dette prosjektet er skrevet i .Net 8 (C#) og benytter seg av NuGet-pakken `Fhi.Slash.Public.SlashMessenger` som ligger ute på [nuget.org](https://www.nuget.org/packages/Fhi.Slash.Public.SlashMessenger).
 
 Konfigurasjoner av de ulike verdiene kan gjøres i `appsettings.json` (eller `appsettings.Development.json` ved lokal testing).
@@ -49,49 +51,56 @@ For å klargjøre programmet må prosjektkoden lastes ned og bygges.
 Etter bygging får man filen `Fhi.Slash.Public.SlashMessengerCLI.exe`, som kan kjøres direkte.
 
 Input-argumenter:
- - Full filsti til meldingen som skal sendes (JSON-fil).
- - Meldingstype (f.eks. HST_Avtale).
- - Meldingsversjon (f.eks. 1).
- - Uttreksdato (f.eks. 01.01.2024). Denne verdien er valgfri; hvis den ikke settes, benyttes dagens dato.
+
+- Full filsti til meldingen som skal sendes (JSON-fil).
+- Meldingstype (f.eks. HST_Avtale).
+- Meldingsversjon (f.eks. 1).
+- Uttreksdato (f.eks. 01.01.2024). Denne verdien er valgfri; hvis den ikke settes, benyttes dagens dato.
 
 Eksempel:
 
-```> C:/folder1/Slash.Public.SlashMessengerCLI.exe "C:/folder2/message.json" "HST_Avtale" "1" "01.01.2024"```
+`> C:/folder1/Fhi.Slash.Public.SlashMessengerCLI.exe "C:/folder2/message.json" "HST_Avtale" "1" "01.01.2024"`
 
 ## Overordnet flyt
+
 For en detaljert forklaring av innsending av data til Slash, besøk GitHub-siden for Slash-prosjektet: [Fhi.Slash.Mottak](https://github.com/folkehelseinstituttet/Fhi.Slash.Mottak?tab=readme-ov-file#overordnet-flyt)
 
 <div style="page-break-after: always"></div>
 
 ## Egne utvidelser
+
 For å sette opp integrasjon mot **Slash** og **HelseID** kan du bruke `AddSlash`-metoden fra `Fhi.Slash.Public.SlashMessenger.Extensions` som finnes i NuGet-pakken `Fhi.Slash.Public.SlashMessenger`.
 
-Når `AddSlash`-metoden kalles, legges flere tjenester, klienter og `HttpClient`-instanser til automatisk. Disse kan overstyres ved behov:
+Når `AddSlash`-metoden kalles, legges flere tjenester, klienter og `HttpClient`-instanser til automatisk. Disse kan overstyres ved behov.
 
 #### Tjenester og klienter
 
 `AddSlash` forsøker å registrere nødvendige tjenester og klienter i `ServiceCollection`. Dersom implementasjoner av de aktuelle interfacene allerede finnes, vil ikke `AddSlash` erstatte disse.  
-Hvis du ønsker å bruke egne implementasjoner, bør disse registreres **før** du kaller `AddSlash`.
+Hvis du ønsker å bruke egne implementasjoner, bør disse registreres **før** du kaller `AddSlash`-metoden.
 
 #### HttpClient
-Egne implementasjoner for `HttpClient`-instanser fungerer på samme måte.
-Dersom du ønsker å bruke spesialtilpassede `HttpClient`-implementasjoner må disse legges til **før** du kaller `AddSlash`.
-De nye implementasjonene må ha samme navn som spesifisert i appsettings.
-Du finner disse navnene under `DefaultSlashClient` eller `DefaultHelseIdClient`, som egenskaper med suffixet `ClientName`.
+
+Egendefinerte implementasjoner av `HttpClient`-instanser fungerer på samme måte.
+Dersom du ønsker å bruke spesialtilpassede `HttpClient`-implementasjoner, må disse legges til **før** du kaller `AddSlash`-metoden.<br/>
+Det er viktig at navnet på `HttpClient`-instansen stemmer overens med det tilsvarende navnet i konfigurasjonsfilene. Se standardverdiene i `SlashConfig.cs` og `HelseIdConfig.cs` for egenskaper med suffikset `ClientName`.
+
+Standardverdiene for `HttpClient`-navn kan erstattes ved behov som en del av konfigurasjonen i `AddSlash`-metoden.
 
 <div style="page-break-after: always"></div>
 
 #### Endre JWK i DPoP-bevis
+
 I standardimplementasjonen brukes samme **JWK** (JSON Web Key) for å signere både **ClientAssertion**-forespørsler mot **HelseID** og **DPoP-bevis** mot **Slash**.
 
-Dersom du ønsker å benytte en annen JWK for signering av DPoP enn den som brukes mot HelseID, kan dette enkelt konfigureres. For å gjøre dette, må du legge til en egen **KeyedSingleton** før du kaller `AddSlash`.
+Dersom du ønsker å benytte en annen JWK for signering av **DPoP-bevis** enn den som brukes mot **HelseID**, kan dette enkelt konfigureres. For å oppnå dette må du legge til en egen **KeyedSingleton** før du kaller `AddSlash`.
 
 ##### Slik gjør du det
-1. **Nøkkelen** som skal brukes for å registrere singletonen er `dPoPProofJwkKey`, som finnes i klassen `ServiceCollectionExtensions`.
-2. Verdien for singletonen skal være en instans av `JsonWebKey`.
 
+1. **Nøkkelen** som skal brukes for å registrere **KeyedSingleton** er gitt i `dPoPProofJwkKey`, som finnes i klassen `ServiceCollectionExtensions`.
+2. Verdien for **KeyedSingleton** skal være en instans av `JsonWebKey`.
 
-#### Eksempel
+#### Eksempler
+
 ```csharp
 // Registrer en egen JWK for signering av DPoP-bevis
 services.AddKeyedSingleton(ServiceCollectionExtensions.dPoPProofJwkKey, new JsonWebKey { ... });
@@ -101,17 +110,22 @@ services.AddTransient<ISlashService, MyCustomSlashService>();
 services.AddTransient<IHelseIdClient, MyCustomHelseIdClient>();
 
 // Overstyr standard HttpClient
-services.AddHttpClient(DefaultSlashClient.BasicClientName, config => config.BaseAddress = new Uri("https://my-domain.com"));
+var slashBasicClientName = "MyBasicClient";
+services.AddHttpClient(slashBasicClientName, config => config.BaseAddress = new Uri("https://my-domain.com"));
 
 // Konfigurer og legg til Slash-integrasjon med tilpasset oppsett
-services.AddSlash(slashConfig => { ... }, helseIdConfig => { ... });
+services.AddSlash(slashConfig => {
+    slashConfig.BasicClientName = slashBasicClientName; // Erstatter standardnavn på HttpClient
+    ...
+}, helseIdConfig => { ... });
 ```
 
- Dette gir deg fleksibilitet til å tilpasse integrasjonen etter dine behov, enten ved å bruke standardimplementasjonene eller dine egne tilpasninger.
+Dette gir deg fleksibilitet til å tilpasse integrasjonen etter dine behov, enten ved å bruke standardimplementasjonene eller dine egne tilpasninger.
 
 <div style="page-break-after: always"></div>
 
 ## Gi oss dine tilbakemeldinger
+
 Dersom du opplever problemer eller har forslag til forbedringer i dette repositoriet, vil vi sette stor pris på dine tilbakemeldinger. Din innsats bidrar til å gjøre prosjektet bedre for alle brukere.
 
 Vi oppfordrer deg til å opprette et issue på GitHub dersom du finner feil, har spørsmål eller ønsker å foreslå nye funksjoner. Alle tilbakemeldinger, store som små, er verdifulle og hjelper oss med å forbedre kvaliteten og funksjonaliteten til løsningen.

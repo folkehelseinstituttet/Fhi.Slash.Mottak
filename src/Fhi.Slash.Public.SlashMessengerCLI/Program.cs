@@ -1,9 +1,9 @@
 ﻿using Microsoft.Extensions.Configuration;
-using Slash.Public.SlashMessenger.Extensions;
-using Slash.Public.SlashMessenger.HelseId.Models;
+using Fhi.Slash.Public.SlashMessenger.Extensions;
+using Fhi.Slash.Public.SlashMessenger.HelseId.Models;
 using Fhi.Slash.Public.SlashMessengerCLI.Config;
 using IdentityModel.Client;
-using Slash.Public.SlashMessenger.Slash.Interfaces;
+using Fhi.Slash.Public.SlashMessenger.Slash.Interfaces;
 using System.Security.Cryptography.X509Certificates;
 using System.Text.Json;
 using Microsoft.Extensions.Hosting;

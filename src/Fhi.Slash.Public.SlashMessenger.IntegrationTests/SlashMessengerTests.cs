@@ -4,8 +4,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json.Linq;
-using Slash.Public.SlashMessenger.Extensions;
-using Slash.Public.SlashMessenger.HelseId.Models;
+using Fhi.Slash.Public.SlashMessenger.Extensions;
+using Fhi.Slash.Public.SlashMessenger.HelseId.Models;
 using Fhi.Slash.Public.SlashMessengerCLI;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net;
@@ -18,6 +18,7 @@ using WireMock.RequestBuilders;
 using WireMock.ResponseBuilders;
 using WireMock.Server;
 using Aes = System.Security.Cryptography.Aes;
+using Fhi.Slash.Public.SlashMessenger.Slash.Models;
 
 namespace Fhi.Slash.Public.SlashMessenger.IntegrationTests;
 
@@ -230,17 +231,17 @@ public sealed class SlashMessengerTests
     {
         // Arrange
         const string testHeader = "test-header";
+        var defaultSlashConfig = new SlashConfig();
 
         SetupMockServer();
 
         var host = SetupHost(_mockServer.Url!, preCustomConfig: services =>
         {
-            services.AddHttpClient("SlashBasicClient", config => {
+            services.AddHttpClient(defaultSlashConfig.BasicClientName, config => {
                 config.BaseAddress = new Uri(new Uri(_mockServer.Url!), "slash/");
                 config.DefaultRequestHeaders.Add(testHeader, "test");
              });
         });
-
 
         // Act
         await Program.Execute(host, ClientTestMessage1FilePath, ClientTestMessage1Type, ClientTestMessage1Version);

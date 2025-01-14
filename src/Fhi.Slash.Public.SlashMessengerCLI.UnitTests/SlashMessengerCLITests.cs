@@ -1,8 +1,8 @@
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Slash.Public.SlashMessenger.Slash.Interfaces;
-using Slash.Public.SlashMessenger.Slash.Models;
+using Fhi.Slash.Public.SlashMessenger.Slash.Interfaces;
+using Fhi.Slash.Public.SlashMessenger.Slash.Models;
 using Fhi.Slash.Public.SlashMessengerCLI.Config;
 using System.Security.Cryptography;
 using NSubstitute;
